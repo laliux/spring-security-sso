@@ -1,0 +1,71 @@
+version: '3'
+# from: https://github.com/keycloak/keycloak-containers/blob/master/docker-compose-examples/keycloak-postgres.yml
+
+networks:
+  mynet:
+
+volumes:
+  postgres_data:
+      driver: local
+
+services:
+  postgres:
+      networks:
+        mynet:
+          aliases:
+            - postgres.local
+      image: postgres
+      volumes:
+        - postgres_data:/var/lib/postgresql/data
+      environment:
+        POSTGRES_DB: keycloak
+        POSTGRES_USER: keycloak
+        POSTGRES_PASSWORD: password
+  keycloak:
+      image: jboss/keycloak:7.0.1
+      container_name: keycloak
+      environment:
+        DB_VENDOR: POSTGRES
+        DB_ADDR: postgres.local
+        DB_DATABASE: keycloak
+        DB_USER: keycloak
+        DB_SCHEMA: public
+        DB_PASSWORD: password
+        KEYCLOAK_USER: admin
+        KEYCLOAK_PASSWORD: Pa55w0rd
+      expose:
+        - 8080
+      ports:
+        - 8080:8080
+      depends_on:
+        - postgres
+      networks:
+        # Replace 'mynet' with whatever user-defined network you are using or want to use
+        mynet:
+          aliases:
+            - keycloak.local
+  mock-flights-service:
+      networks:
+        - mynet
+      image: mock-flights-service:latest
+      container_name: mock-flights-service
+      expose:
+        - "8081"
+      depends_on:
+        - keycloak
+  mock-hotels-service:
+      networks:
+        - mynet
+      image: mock-hotels-service:latest
+      container_name: mock-hotels-service
+      expose:
+        - "8082"
+      depends_on:
+        - keycloak
+  travel-spring-gateway:
+    networks:
+      - mynet
+    image: travel-spring-gateway:latest
+    container_name: travel-spring-gateway
+    ports:
+      - 9090:9090

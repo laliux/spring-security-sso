@@ -1,5 +1,5 @@
 server:
-  port: 8080
+  port: 9090
 
 spring:
   application:
@@ -9,12 +9,12 @@ spring:
       client:
         provider:
           keycloak:
-            issuer-uri: http://localhost:8090/auth/realms/spring-cloud-gateway-realm
+            issuer-uri: http://keycloak.local:8080/auth/realms/spring-cloud-gateway-realm
             user-name-attribute: preferred_username
         registration:
           keycloak:
             client-id: spring-cloud-gateway-client
-            client-secret: 016c6e1c-9cbe-4ad3-aee1-01ddbb370f32
+            client-secret: 38cfdb09-0605-4aab-ac67-b97ef5bbcba8
 
   cloud:
     gateway:
@@ -30,12 +30,12 @@ spring:
         - StripPrefix=1
 
       - id: flights-service
-        uri: http://127.0.0.1:8081/flights
+        uri: http://mock-flights-service:8081/flights
         predicates:
         - Path=/flights/**
 
       - id: hotels-service
-        uri: http://127.0.0.1:8082/hotels
+        uri: http://mock-hotels-service:8082/hotels
         predicates:
         - Path=/hotels/**
 
